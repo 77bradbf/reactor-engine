@@ -339,3 +339,8 @@ This mode still uses the built-in Arrhenius rate law, but it replaces constant m
 - `REACTOR_ENGINE_USAGE.md`: extra usage notes
 - `examples/`: example input data files
 - `plots/`: saved example plots
+
+## License
+
+This project is licensed under the MIT License. See `LICENSE` for details.
+
