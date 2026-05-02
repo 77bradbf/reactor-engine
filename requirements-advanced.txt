@@ -1,0 +1,16 @@
+# Robust spreadsheet/data handling
+pandas
+openpyxl
+
+# Unit-aware calculations
+pint
+
+# Better nonlinear fitting and uncertainty reports
+lmfit
+
+# Chemical and thermophysical property libraries
+thermo
+CoolProp
+
+# Detailed kinetics, thermodynamics, transport, and reactor networks
+cantera

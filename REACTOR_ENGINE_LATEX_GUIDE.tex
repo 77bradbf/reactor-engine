@@ -1,0 +1,824 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{listings}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+\lstdefinestyle{terminal}{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    columns=fullflexible,
+    backgroundcolor=\color{gray!8}
+}
+
+\lstset{style=terminal}
+
+\title{Reactor Engineering Engine: Capabilities, Inputs, and Worked Command Examples}
+\author{Reactor Engine User Guide}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{Purpose of the Code}
+
+The main file is:
+
+\begin{lstlisting}
+reactor_engine.py
+\end{lstlisting}
+
+It is a Python command-line tool for common chemical reaction engineering calculations. The code can compute reactor design, conversion profiles, temperature profiles, reaction selectivity, reaction yield, kinetic parameters from experimental data, and parallel-reaction CSTR optimization.
+
+The general command pattern is:
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode MODE_NAME [inputs]
+\end{lstlisting}
+
+The most important input is always \texttt{--mode}, because it tells the code what type of problem to solve.
+
+\section{Before Running}
+
+From Terminal, clone the project and go to the project folder:
+
+\begin{lstlisting}
+git clone https://github.com/77bradbf/reactor-engine.git
+cd reactor-engine
+\end{lstlisting}
+
+Install the base Python packages if needed:
+
+\begin{lstlisting}
+pip install -r requirements.txt
+\end{lstlisting}
+
+For advanced real-data/property calculations, install:
+
+\begin{lstlisting}
+pip install -r requirements-advanced.txt
+\end{lstlisting}
+
+Show all available options:
+
+\begin{lstlisting}
+python3 reactor_engine.py --help
+\end{lstlisting}
+
+Run without plots:
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode series-batch --no-show
+\end{lstlisting}
+
+Run with plots:
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode series-batch
+\end{lstlisting}
+
+Save plots instead of opening them:
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode series-batch --save-plots plots --no-show
+\end{lstlisting}
+
+\section{Modes Available}
+
+\begin{center}
+\begin{tabular}{p{0.28\linewidth} p{0.62\linewidth}}
+\toprule
+\textbf{Mode} & \textbf{What It Computes} \\
+\midrule
+\texttt{cstr} & Single-reaction CSTR conversion or required volume. \\
+\texttt{pfr} & Single-reaction isothermal PFR conversion profile. \\
+\texttt{nonisothermal-pfr} & Coupled conversion and temperature profile for a PFR. \\
+\texttt{series-batch} & Batch reactor for first-order series reactions $A \to B \to C$. \\
+\texttt{series-cstr} & CSTR for first-order series reactions $A \to B \to C$. \\
+\texttt{kinetic-fit-power-law} & Fits $r = kx_1^\alpha x_2^\beta$ from experimental data. \\
+\texttt{parallel-cstr} & Optimizes selectivity and profit for parallel CSTR reactions. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Mode 1: Single-Reaction CSTR}
+
+\subsection{What the Code Computes}
+
+For a CSTR, the code uses the design equation:
+
+\begin{equation}
+V = \frac{F_{A0}X}{-r_A}
+\end{equation}
+
+The default reaction rate is second-order:
+
+\begin{equation}
+-r_A = k C_A C_B
+\end{equation}
+
+The default Arrhenius equation is:
+
+\begin{equation}
+k = A\exp\left(-\frac{E_a}{RT}\right)
+\end{equation}
+
+with:
+
+\begin{align*}
+A &= 5.7\times10^5 \\
+E_a &= 33400\ \text{J/mol} \\
+R &= 8.314\ \text{J/(mol K)}
+\end{align*}
+
+\subsection{Minimum Inputs}
+
+For a CSTR, you must know either:
+
+\begin{itemize}
+    \item target conversion $X$, to calculate volume, or
+    \item reactor volume $V$, to calculate conversion.
+\end{itemize}
+
+Useful inputs are:
+
+\begin{itemize}
+    \item \texttt{--target-x}
+    \item \texttt{--volume}
+    \item \texttt{--temperature}
+    \item \texttt{--fa0}
+    \item \texttt{--fb0}
+    \item \texttt{--v0}
+\end{itemize}
+
+\subsection{Example 1A: Find CSTR Volume for a Target Conversion}
+
+\textbf{Problem statement.} A liquid-phase reaction follows:
+
+\begin{equation}
+-r_A = k C_A C_B
+\end{equation}
+
+A feed contains $F_{A0}=10$ mol/min and $F_{B0}=15$ mol/min. The inlet volumetric flow rate is $v_0=100$ L/min. The reactor is isothermal at 360 K. Find the CSTR volume required for 65\% conversion.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode cstr --target-x 0.65 --temperature 360 --fa0 10 --fb0 15 --v0 100 --no-show
+\end{lstlisting}
+
+\textbf{What each input means.}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Input} & \textbf{Meaning} \\
+\midrule
+\texttt{--mode cstr} & Use CSTR design equation. \\
+\texttt{--target-x 0.65} & Desired conversion is 65\%. \\
+\texttt{--temperature 360} & Reactor temperature is 360 K. \\
+\texttt{--fa0 10} & Inlet molar flow of A. \\
+\texttt{--fb0 15} & Inlet molar flow of B. \\
+\texttt{--v0 100} & Inlet volumetric flow rate. \\
+\texttt{--no-show} & Print output without opening a plot window. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Example 1B: Find CSTR Conversion for a Known Volume}
+
+\textbf{Problem statement.} The same reaction is run in a 250 L CSTR at 360 K. Find the exit conversion.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode cstr --volume 250 --temperature 360 --fa0 10 --fb0 15 --v0 100 --no-show
+\end{lstlisting}
+
+\section{Mode 2: Isothermal PFR}
+
+\subsection{What the Code Computes}
+
+For an isothermal plug flow reactor, the code integrates:
+
+\begin{equation}
+\frac{dX}{dV}=\frac{-r_A}{F_{A0}}
+\end{equation}
+
+The default rate law is:
+
+\begin{equation}
+-r_A = kC_A C_B
+\end{equation}
+
+\subsection{Minimum Inputs}
+
+At minimum, use:
+
+\begin{itemize}
+    \item \texttt{--mode pfr}
+    \item \texttt{--volume}
+\end{itemize}
+
+Add feed and temperature data when the problem gives them.
+
+\subsection{Example 2A: Liquid-Phase PFR Conversion}
+
+\textbf{Problem statement.} A second-order liquid-phase reaction is carried out in a 400 L PFR at 375 K. The feed contains $F_{A0}=8$ mol/min, $F_{B0}=12$ mol/min, and $v_0=80$ L/min. Find the exit conversion.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode pfr --volume 400 --temperature 375 --fa0 8 --fb0 12 --v0 80 --no-show
+\end{lstlisting}
+
+\subsection{Example 2B: PFR with a Different Temperature}
+
+\textbf{Problem statement.} Repeat the PFR calculation at 390 K to see the effect of temperature on conversion.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode pfr --volume 400 --temperature 390 --fa0 8 --fb0 12 --v0 80 --no-show
+\end{lstlisting}
+
+\section{Mode 3: Gas-Phase PFR with Expansion}
+
+\subsection{What the Code Computes}
+
+For gas-phase reactions, volumetric flow may change with conversion. The code can use:
+
+\begin{equation}
+v = v_0(1+\epsilon X)
+\end{equation}
+
+where:
+
+\begin{equation}
+\epsilon = y_{A0}\delta
+\end{equation}
+
+\subsection{Minimum Inputs}
+
+Use the normal PFR inputs plus:
+
+\begin{itemize}
+    \item \texttt{--gas-phase}
+    \item \texttt{--y-a0}
+    \item \texttt{--delta}
+\end{itemize}
+
+\subsection{Example 3A: Gas Expansion Reduces Concentration}
+
+\textbf{Problem statement.} A gas-phase reaction is carried out in a 400 L PFR at 375 K. The inlet mole fraction of A is $y_{A0}=0.4$ and $\delta=1.5$. Find the conversion when expansion is included.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode pfr --volume 400 --temperature 375 --fa0 8 --fb0 12 --v0 80 --gas-phase --y-a0 0.4 --delta 1.5 --no-show
+\end{lstlisting}
+
+\subsection{Example 3B: Stronger Gas Expansion}
+
+\textbf{Problem statement.} Repeat the gas-phase PFR problem with $\delta=2.5$.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode pfr --volume 400 --temperature 375 --fa0 8 --fb0 12 --v0 80 --gas-phase --y-a0 0.4 --delta 2.5 --no-show
+\end{lstlisting}
+
+\section{Mode 4: Non-Isothermal PFR}
+
+\subsection{What the Code Computes}
+
+The code solves the coupled PFR material and energy balance:
+
+\begin{align}
+\frac{dX}{dV} &= \frac{-r_A}{F_{A0}} \\
+\frac{dT}{dV} &= \frac{Ua(T_a-T)+(-r_A)(-\Delta H_{rxn})}{\sum F_i C_{p,i}}
+\end{align}
+
+\subsection{Minimum Inputs}
+
+Use:
+
+\begin{itemize}
+    \item \texttt{--mode nonisothermal-pfr}
+    \item \texttt{--volume}
+    \item \texttt{--t0}
+    \item \texttt{--delta-h}
+    \item \texttt{--ua}
+    \item \texttt{--ta}
+    \item heat capacities if different from defaults
+\end{itemize}
+
+\subsection{Example 4A: Exothermic PFR with Cooling}
+
+\textbf{Problem statement.} An exothermic liquid-phase reaction is carried out in a 300 L PFR. Feed enters at 340 K with $F_{A0}=12$ mol/min, $F_{B0}=18$ mol/min, and $v_0=120$ L/min. The heat of reaction is $-45000$ J/mol, $Ua=350$, and coolant temperature is 320 K. Find conversion and exit temperature.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode nonisothermal-pfr --volume 300 --fa0 12 --fb0 18 --v0 120 --t0 340 --delta-h -45000 --ua 350 --ta 320 --cp-a 95 --cp-b 110 --cp-p 120 --no-show
+\end{lstlisting}
+
+\subsection{Example 4B: Weak Cooling}
+
+\textbf{Problem statement.} Repeat the previous problem with weaker heat removal, $Ua=100$.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode nonisothermal-pfr --volume 300 --fa0 12 --fb0 18 --v0 120 --t0 340 --delta-h -45000 --ua 100 --ta 320 --cp-a 95 --cp-b 110 --cp-p 120 --no-show
+\end{lstlisting}
+
+\subsection{Example 4C: Gas-Phase Non-Isothermal PFR with Temperature Correction}
+
+\textbf{Problem statement.} A gas-phase non-isothermal PFR has both conversion expansion and temperature expansion. Use $v=v_0(1+\epsilon X)(T/T_0)$.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode nonisothermal-pfr --volume 250 --fa0 10 --fb0 15 --v0 100 --t0 350 --gas-phase --y-a0 0.5 --delta 1.0 --ideal-gas-temperature-correction --delta-h -30000 --ua 250 --ta 330 --no-show
+\end{lstlisting}
+
+\section{Mode 5: Series Batch Reactor, $A \to B \to C$}
+
+\subsection{What the Code Computes}
+
+For first-order series reactions:
+
+\begin{equation}
+A \xrightarrow{k_1} B \xrightarrow{k_2} C
+\end{equation}
+
+The batch reactor expressions are:
+
+\begin{align}
+C_A(t) &= C_{A0}e^{-k_1t} \\
+C_B(t) &= \frac{C_{A0}k_1}{k_2-k_1}\left(e^{-k_1t}-e^{-k_2t}\right) \\
+C_C(t) &= C_{A0}-C_A(t)-C_B(t)
+\end{align}
+
+The time for maximum $B$ is:
+
+\begin{equation}
+t_{max} = \frac{\ln(k_1/k_2)}{k_1-k_2}
+\end{equation}
+
+\subsection{Minimum Inputs}
+
+Use:
+
+\begin{itemize}
+    \item \texttt{--mode series-batch}
+    \item \texttt{--series-k1}
+    \item \texttt{--series-k2}
+    \item \texttt{--ca0}
+\end{itemize}
+
+\subsection{Example 5A: Intermediate Product in Batch Reactor}
+
+\textbf{Problem statement.} The elementary liquid-phase series reaction $A \to B \to C$ is carried out in a batch reactor. Let $k_1=0.5$ h$^{-1}$, $k_2=0.2$ h$^{-1}$, and $C_{A0}=2$ mol/L. Plot concentrations from 0 to 12 h and find the time for maximum $B$.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode series-batch --series-k1 0.5 --series-k2 0.2 --ca0 2 --time-start 0 --time-end 12
+\end{lstlisting}
+
+Use \texttt{--no-show} if you do not want the plot:
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode series-batch --series-k1 0.5 --series-k2 0.2 --ca0 2 --time-start 0 --time-end 12 --no-show
+\end{lstlisting}
+
+\subsection{Example 5B: Faster Desired Step, Slower Undesired Step}
+
+\textbf{Problem statement.} A batch reactor has $k_1=0.8$ h$^{-1}$ and $k_2=0.15$ h$^{-1}$. The initial A concentration is 3 mol/L. Find the best time to stop the batch to maximize $B$.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode series-batch --series-k1 0.8 --series-k2 0.15 --ca0 3 --time-start 0 --time-end 20 --no-show
+\end{lstlisting}
+
+\subsection{Example 5C: Undesired Step Is Fast}
+
+\textbf{Problem statement.} A batch reactor has $k_1=0.4$ h$^{-1}$ and $k_2=1.1$ h$^{-1}$. Since $B$ disappears quickly, find the maximum possible concentration of $B$.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode series-batch --series-k1 0.4 --series-k2 1.1 --ca0 2.5 --time-start 0 --time-end 10 --no-show
+\end{lstlisting}
+
+\section{Mode 6: Series CSTR, $A \to B \to C$}
+
+\subsection{What the Code Computes}
+
+For a CSTR with first-order series reactions:
+
+\begin{align}
+C_A(\tau) &= \frac{C_{A0}}{1+k_1\tau} \\
+C_B(\tau) &= \frac{k_1\tau C_A(\tau)}{1+k_2\tau} \\
+C_C(\tau) &= C_{A0}-C_A(\tau)-C_B(\tau)
+\end{align}
+
+The residence time that maximizes $B$ is:
+
+\begin{equation}
+\tau_{opt}=\frac{1}{\sqrt{k_1k_2}}
+\end{equation}
+
+\subsection{Example 6A: CSTR Intermediate Optimization}
+
+\textbf{Problem statement.} The same reaction $A \to B \to C$ is carried out in a CSTR. Use $k_1=0.5$ h$^{-1}$, $k_2=0.2$ h$^{-1}$, and $C_{A0}=2$ mol/L. Find the residence time that maximizes $B$.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode series-cstr --series-k1 0.5 --series-k2 0.2 --ca0 2 --time-start 0 --time-end 12 --no-show
+\end{lstlisting}
+
+\subsection{Example 6B: Larger Initial Concentration}
+
+\textbf{Problem statement.} A CSTR uses the same rate constants but $C_{A0}=5$ mol/L. Find the maximum $B$ concentration and the optimum residence time.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode series-cstr --series-k1 0.5 --series-k2 0.2 --ca0 5 --time-start 0 --time-end 12 --no-show
+\end{lstlisting}
+
+\subsection{Example 6C: Different Rate Constants}
+
+\textbf{Problem statement.} A CSTR has $k_1=1.2$ h$^{-1}$ and $k_2=0.3$ h$^{-1}$. The feed concentration of A is 1.8 mol/L. Find the residence time that maximizes $B$.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode series-cstr --series-k1 1.2 --series-k2 0.3 --ca0 1.8 --time-start 0 --time-end 10 --no-show
+\end{lstlisting}
+
+\section{Mode 7: Power-Law Kinetic Fitting}
+
+\subsection{What the Code Computes}
+
+This mode fits a two-reactant power-law rate model:
+
+\begin{equation}
+r = kx_1^\alpha x_2^\beta
+\end{equation}
+
+Taking logs gives:
+
+\begin{equation}
+\ln r = \ln k + \alpha \ln x_1 + \beta \ln x_2
+\end{equation}
+
+The code uses linear least squares on the log-transformed data to calculate:
+
+\begin{itemize}
+    \item $\alpha$
+    \item $\beta$
+    \item $k$
+    \item $R^2$ on $\ln(r)$
+    \item predicted rates
+    \item an observed-versus-predicted plot
+\end{itemize}
+
+\subsection{Minimum Inputs}
+
+If using the built-in photo example, only this is needed:
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode kinetic-fit-power-law --no-show
+\end{lstlisting}
+
+For new data, use:
+
+\begin{itemize}
+    \item \texttt{--fit-data-csv examples/myfile.csv}, or
+    \item \texttt{--fit-data-csv examples/myfile.xlsx}
+\end{itemize}
+
+The option is called \texttt{--fit-data-csv}, but it accepts both CSV and Excel files.
+
+\subsection{Data Format A: Rate Already Given}
+
+Use this table if the problem directly gives the measured rate:
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+\texttt{x1} & \texttt{x2} & \texttt{rate} \\
+\midrule
+0.20 & 0.30 & 0.0048 \\
+0.40 & 0.30 & 0.0096 \\
+0.20 & 0.60 & 0.0068 \\
+0.50 & 0.50 & 0.0141 \\
+0.80 & 0.40 & 0.0202 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Save this as:
+
+\begin{lstlisting}
+examples/power_fit_example.xlsx
+\end{lstlisting}
+
+or:
+
+\begin{lstlisting}
+examples/power_fit_example.csv
+\end{lstlisting}
+
+Then run:
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode kinetic-fit-power-law --fit-data-csv examples/power_fit_example.xlsx --no-show
+\end{lstlisting}
+
+\subsection{Example 7A: Fit a New Catalytic Rate Law}
+
+\textbf{Problem statement.} A catalytic reaction $A+B\to P$ follows:
+
+\begin{equation}
+r_P = kP_A^\alpha P_B^\beta
+\end{equation}
+
+The experimental data are shown in the previous table. Determine $\alpha$, $\beta$, and $k$.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode kinetic-fit-power-law --fit-data-csv examples/power_fit_example.xlsx --no-show
+\end{lstlisting}
+
+\subsection{Data Format B: Product Mole Fraction Given}
+
+Use this table if the problem gives total outlet flow and product mole fraction:
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+\texttt{total\_flow} & \texttt{x1} & \texttt{x2} & \texttt{y\_product} \\
+\midrule
+0.61 & 0.50 & 0.51 & 0.07 \\
+0.60 & 1.00 & 0.54 & 0.16 \\
+0.30 & 0.40 & 0.60 & 0.16 \\
+0.72 & 0.60 & 0.60 & 0.10 \\
+0.52 & 0.60 & 0.40 & 0.06 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The code calculates:
+
+\begin{equation}
+r = \frac{F_T y_P}{W_{cat}}
+\end{equation}
+
+where $F_T$ is total molar flow, $y_P$ is product mole fraction, and $W_{cat}$ is catalyst mass.
+
+\subsection{Example 7B: Gas-Phase Catalytic CSTR Fit}
+
+\textbf{Problem statement.} The irreversible gas-phase reaction
+
+\begin{equation}
+H_2 + C_2H_6 \to 2CH_4
+\end{equation}
+
+is carried out over nickel catalyst. The model is:
+
+\begin{equation}
+r'_{CH_4}=kP_{C_2H_6}^{\alpha}P_{H_2}^{\beta}
+\end{equation}
+
+A CSTR contains four baskets with 10 g catalyst each, so $W_{cat}=40$ g. Determine $\alpha$, $\beta$, and $k$.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode kinetic-fit-power-law --fit-data-csv examples/kinetic_fit_photo.csv --catalyst-weight 40 --no-show
+\end{lstlisting}
+
+\subsection{Example 7C: Same Fit with a Plot}
+
+Remove \texttt{--no-show}:
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode kinetic-fit-power-law --fit-data-csv examples/kinetic_fit_photo.csv --catalyst-weight 40
+\end{lstlisting}
+
+\subsection{Example 7D: Saving the Fit Plot}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode kinetic-fit-power-law --fit-data-csv examples/kinetic_fit_photo.csv --catalyst-weight 40 --save-plots plots --no-show
+\end{lstlisting}
+
+\section{Mode 8: Parallel-Reaction CSTR Optimization}
+
+\subsection{What the Code Computes}
+
+This mode handles parallel reactions:
+
+\begin{align}
+A+B &\to D &&\text{desired product} \\
+A+B &\to U_1 &&\text{undesired product} \\
+A+B &\to U_2 &&\text{undesired product}
+\end{align}
+
+The general rate laws are:
+
+\begin{align}
+r_D &= k_D C_A^{a_D}C_B^{b_D} \\
+r_{U1} &= k_{U1} C_A^{a_{U1}}C_B^{b_{U1}} \\
+r_{U2} &= k_{U2} C_A^{a_{U2}}C_B^{b_{U2}}
+\end{align}
+
+The instantaneous selectivity is:
+
+\begin{equation}
+S_{D/(U1+U2)} = \frac{r_D}{r_{U1}+r_{U2}}
+\end{equation}
+
+The code finds the exit $C_A$ that maximizes selectivity. It also estimates residence time, volumetric flow rate, and profit difference using old and optimized outlet concentrations.
+
+\subsection{Minimum Inputs}
+
+Important inputs are:
+
+\begin{itemize}
+    \item feed concentrations: \texttt{--parallel-ca0}, \texttt{--parallel-cb0}
+    \item known exit B concentration: \texttt{--parallel-exit-cb}
+    \item reactor volume: \texttt{--parallel-volume}
+    \item rate constants: \texttt{--parallel-kd}, \texttt{--parallel-ku1}, \texttt{--parallel-ku2}
+    \item reaction orders: \texttt{--d-exp-a}, \texttt{--d-exp-b}, etc.
+    \item prices and costs if profit is required
+\end{itemize}
+
+\subsection{Example 8A: Parallel CSTR with Selectivity and Profit}
+
+\textbf{Problem statement.} A 500 L CSTR is used for the liquid-phase parallel reactions:
+
+\begin{align*}
+A+B &\to D \\
+A+B &\to U_1 \\
+A+B &\to U_2
+\end{align*}
+
+The feed has $C_{A0}=2.5$ mol/L and $C_{B0}=1.8$ mol/L. The outlet concentration of B is 0.6 mol/L. The rate laws are:
+
+\begin{align*}
+r_D &= 0.45C_A^1C_B^1 \\
+r_{U1} &= 0.12C_A^{0.5}C_B^1 \\
+r_{U2} &= 0.08C_A^2C_B^1
+\end{align*}
+
+Product D sells for 75 dollars/mol, and disposal of each undesired product costs 15 dollars/mol. The previous outlet stream had $D=1.1$, $U_1=0.4$, $U_2=0.5$ mol/L. The optimized outlet stream has $D=1.4$, $U_1=0.25$, $U_2=0.35$ mol/L. Find the exit $C_A$ that maximizes selectivity, the residence time, volumetric flow rate, and profit increase.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode parallel-cstr --parallel-ca0 2.5 --parallel-cb0 1.8 --parallel-exit-cb 0.6 --parallel-volume 500 --parallel-kd 0.45 --parallel-ku1 0.12 --parallel-ku2 0.08 --d-exp-a 1 --d-exp-b 1 --u1-exp-a 0.5 --u1-exp-b 1 --u2-exp-a 2 --u2-exp-b 1 --desired-price 75 --undesired-cost 15 --previous-d 1.1 --previous-u1 0.4 --previous-u2 0.5 --optimized-d 1.4 --optimized-u1 0.25 --optimized-u2 0.35 --no-show
+\end{lstlisting}
+
+\subsection{Example 8B: Same Problem with a Plot}
+
+Remove \texttt{--no-show}:
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode parallel-cstr --parallel-ca0 2.5 --parallel-cb0 1.8 --parallel-exit-cb 0.6 --parallel-volume 500 --parallel-kd 0.45 --parallel-ku1 0.12 --parallel-ku2 0.08 --d-exp-a 1 --d-exp-b 1 --u1-exp-a 0.5 --u1-exp-b 1 --u2-exp-a 2 --u2-exp-b 1 --desired-price 75 --undesired-cost 15 --previous-d 1.1 --previous-u1 0.4 --previous-u2 0.5 --optimized-d 1.4 --optimized-u1 0.25 --optimized-u2 0.35
+\end{lstlisting}
+
+\subsection{Example 8C: Change the Undesired Reaction Order}
+
+\textbf{Problem statement.} Suppose the second undesired reaction is less sensitive to A:
+
+\begin{equation}
+r_{U2}=0.08C_A^{1.5}C_B
+\end{equation}
+
+Find the new optimum.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode parallel-cstr --parallel-ca0 2.5 --parallel-cb0 1.8 --parallel-exit-cb 0.6 --parallel-volume 500 --parallel-kd 0.45 --parallel-ku1 0.12 --parallel-ku2 0.08 --d-exp-a 1 --d-exp-b 1 --u1-exp-a 0.5 --u1-exp-b 1 --u2-exp-a 1.5 --u2-exp-b 1 --no-show
+\end{lstlisting}
+
+\subsection{Example 8D: Higher Desired Product Price}
+
+\textbf{Problem statement.} If product D sells for 120 dollars/mol instead of 75 dollars/mol, calculate the new profit increase.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py --mode parallel-cstr --parallel-ca0 2.5 --parallel-cb0 1.8 --parallel-exit-cb 0.6 --parallel-volume 500 --parallel-kd 0.45 --parallel-ku1 0.12 --parallel-ku2 0.08 --d-exp-a 1 --d-exp-b 1 --u1-exp-a 0.5 --u1-exp-b 1 --u2-exp-a 2 --u2-exp-b 1 --desired-price 120 --undesired-cost 15 --previous-d 1.1 --previous-u1 0.4 --previous-u2 0.5 --optimized-d 1.4 --optimized-u1 0.25 --optimized-u2 0.35 --no-show
+\end{lstlisting}
+
+\section{Common Input Checklist}
+
+\subsection{For Reactor Design Problems}
+
+Ask:
+
+\begin{enumerate}
+    \item What reactor type is it: CSTR, PFR, batch, or non-isothermal PFR?
+    \item What is the rate law?
+    \item What are the rate constants and temperature?
+    \item What are the feed molar flows or concentrations?
+    \item Is the problem asking for conversion, volume, residence time, selectivity, yield, or temperature?
+    \item Is it gas phase? If yes, is expansion important?
+\end{enumerate}
+
+\subsection{For Kinetic Fitting Problems}
+
+Ask:
+
+\begin{enumerate}
+    \item Does the problem give measured rates directly?
+    \item Or does it give flow rate and product mole fraction?
+    \item What are $x_1$ and $x_2$? Usually pressures or concentrations.
+    \item What is the catalyst weight, if rates must be calculated from product flow?
+    \item Are all values positive? Log fitting requires positive data.
+\end{enumerate}
+
+\subsection{For Parallel Selectivity Problems}
+
+Ask:
+
+\begin{enumerate}
+    \item Which product is desired?
+    \item Which products are undesired?
+    \item What are the rate laws for each path?
+    \item Which concentration is fixed at the exit?
+    \item What concentration should be optimized?
+    \item Is profit required? If yes, what are product values and disposal costs?
+\end{enumerate}
+
+\section{All Major Command-Line Inputs}
+
+\begin{center}
+\begin{tabular}{p{0.34\linewidth} p{0.56\linewidth}}
+\toprule
+\textbf{Input} & \textbf{Meaning} \\
+\midrule
+\texttt{--mode} & Selects the calculation type. \\
+\texttt{--volume} & Reactor volume. \\
+\texttt{--target-x} & Target conversion for CSTR volume calculation. \\
+\texttt{--temperature} & Isothermal reactor temperature. \\
+\texttt{--fa0}, \texttt{--fb0} & Inlet molar flows of A and B. \\
+\texttt{--v0} & Inlet volumetric flow rate. \\
+\texttt{--arrhenius-a}, \texttt{--ea} & Arrhenius parameters. \\
+\texttt{--gas-phase} & Turns on gas expansion. \\
+\texttt{--y-a0}, \texttt{--delta} & Gas expansion parameters. \\
+\texttt{--delta-h}, \texttt{--ua}, \texttt{--ta} & Energy balance parameters. \\
+\texttt{--series-k1}, \texttt{--series-k2} & Series reaction rate constants. \\
+\texttt{--ca0} & Initial or feed concentration of A for series reactions. \\
+\texttt{--fit-data-csv} & CSV or Excel data file for kinetic fitting. \\
+\texttt{--catalyst-weight} & Catalyst mass for product-flow data. \\
+\texttt{--parallel-ca0}, \texttt{--parallel-cb0} & Feed concentrations for parallel CSTR. \\
+\texttt{--parallel-kd}, \texttt{--parallel-ku1}, \texttt{--parallel-ku2} & Parallel reaction rate constants. \\
+\texttt{--d-exp-a}, \texttt{--u1-exp-a}, etc. & Reaction orders in the parallel rate laws. \\
+\texttt{--desired-price}, \texttt{--undesired-cost} & Economic values for profit calculation. \\
+\texttt{--no-show} & Suppresses plot windows. \\
+\texttt{--save-plots} & Saves plots to a folder. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Summary}
+
+The code is most useful when you first classify the problem:
+
+\begin{itemize}
+    \item Use \texttt{cstr} for a single CSTR design equation.
+    \item Use \texttt{pfr} for a single isothermal PFR profile.
+    \item Use \texttt{nonisothermal-pfr} when temperature changes with volume.
+    \item Use \texttt{series-batch} for batch $A\to B\to C$ problems.
+    \item Use \texttt{series-cstr} for CSTR $A\to B\to C$ problems.
+    \item Use \texttt{kinetic-fit-power-law} when the problem gives experimental data and asks for reaction orders and $k$.
+    \item Use \texttt{parallel-cstr} when the problem asks for selectivity, yield, waste products, or profit optimization in parallel reactions.
+\end{itemize}
+
+\end{document}
