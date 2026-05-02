@@ -182,7 +182,14 @@ A feed contains $F_{A0}=10$ mol/min and $F_{B0}=15$ mol/min. The inlet volumetri
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode cstr --target-x 0.65 --temperature 360 --fa0 10 --fb0 15 --v0 100 --no-show
+python3 reactor_engine.py \
+  --mode cstr \
+  --target-x 0.65 \
+  --temperature 360 \
+  --fa0 10 \
+  --fb0 15 \
+  --v0 100 \
+  --no-show
 \end{lstlisting}
 
 \textbf{What each input means.}
@@ -210,7 +217,14 @@ python3 reactor_engine.py --mode cstr --target-x 0.65 --temperature 360 --fa0 10
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode cstr --volume 250 --temperature 360 --fa0 10 --fb0 15 --v0 100 --no-show
+python3 reactor_engine.py \
+  --mode cstr \
+  --volume 250 \
+  --temperature 360 \
+  --fa0 10 \
+  --fb0 15 \
+  --v0 100 \
+  --no-show
 \end{lstlisting}
 
 \section{Mode 2: Isothermal PFR}
@@ -247,7 +261,14 @@ Add feed and temperature data when the problem gives them.
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode pfr --volume 400 --temperature 375 --fa0 8 --fb0 12 --v0 80 --no-show
+python3 reactor_engine.py \
+  --mode pfr \
+  --volume 400 \
+  --temperature 375 \
+  --fa0 8 \
+  --fb0 12 \
+  --v0 80 \
+  --no-show
 \end{lstlisting}
 
 \subsection{Example 2B: PFR with a Different Temperature}
@@ -257,7 +278,14 @@ python3 reactor_engine.py --mode pfr --volume 400 --temperature 375 --fa0 8 --fb
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode pfr --volume 400 --temperature 390 --fa0 8 --fb0 12 --v0 80 --no-show
+python3 reactor_engine.py \
+  --mode pfr \
+  --volume 400 \
+  --temperature 390 \
+  --fa0 8 \
+  --fb0 12 \
+  --v0 80 \
+  --no-show
 \end{lstlisting}
 
 \section{Mode 3: Gas-Phase PFR with Expansion}
@@ -293,7 +321,17 @@ Use the normal PFR inputs plus:
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode pfr --volume 400 --temperature 375 --fa0 8 --fb0 12 --v0 80 --gas-phase --y-a0 0.4 --delta 1.5 --no-show
+python3 reactor_engine.py \
+  --mode pfr \
+  --volume 400 \
+  --temperature 375 \
+  --fa0 8 \
+  --fb0 12 \
+  --v0 80 \
+  --gas-phase \
+  --y-a0 0.4 \
+  --delta 1.5 \
+  --no-show
 \end{lstlisting}
 
 \subsection{Example 3B: Stronger Gas Expansion}
@@ -303,7 +341,17 @@ python3 reactor_engine.py --mode pfr --volume 400 --temperature 375 --fa0 8 --fb
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode pfr --volume 400 --temperature 375 --fa0 8 --fb0 12 --v0 80 --gas-phase --y-a0 0.4 --delta 2.5 --no-show
+python3 reactor_engine.py \
+  --mode pfr \
+  --volume 400 \
+  --temperature 375 \
+  --fa0 8 \
+  --fb0 12 \
+  --v0 80 \
+  --gas-phase \
+  --y-a0 0.4 \
+  --delta 2.5 \
+  --no-show
 \end{lstlisting}
 
 \section{Mode 4: Non-Isothermal PFR}
@@ -338,7 +386,20 @@ Use:
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode nonisothermal-pfr --volume 300 --fa0 12 --fb0 18 --v0 120 --t0 340 --delta-h -45000 --ua 350 --ta 320 --cp-a 95 --cp-b 110 --cp-p 120 --no-show
+python3 reactor_engine.py \
+  --mode nonisothermal-pfr \
+  --volume 300 \
+  --fa0 12 \
+  --fb0 18 \
+  --v0 120 \
+  --t0 340 \
+  --delta-h -45000 \
+  --ua 350 \
+  --ta 320 \
+  --cp-a 95 \
+  --cp-b 110 \
+  --cp-p 120 \
+  --no-show
 \end{lstlisting}
 
 \subsection{Example 4B: Weak Cooling}
@@ -348,7 +409,20 @@ python3 reactor_engine.py --mode nonisothermal-pfr --volume 300 --fa0 12 --fb0 1
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode nonisothermal-pfr --volume 300 --fa0 12 --fb0 18 --v0 120 --t0 340 --delta-h -45000 --ua 100 --ta 320 --cp-a 95 --cp-b 110 --cp-p 120 --no-show
+python3 reactor_engine.py \
+  --mode nonisothermal-pfr \
+  --volume 300 \
+  --fa0 12 \
+  --fb0 18 \
+  --v0 120 \
+  --t0 340 \
+  --delta-h -45000 \
+  --ua 100 \
+  --ta 320 \
+  --cp-a 95 \
+  --cp-b 110 \
+  --cp-p 120 \
+  --no-show
 \end{lstlisting}
 
 \subsection{Example 4C: Gas-Phase Non-Isothermal PFR with Temperature Correction}
@@ -358,7 +432,21 @@ python3 reactor_engine.py --mode nonisothermal-pfr --volume 300 --fa0 12 --fb0 1
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode nonisothermal-pfr --volume 250 --fa0 10 --fb0 15 --v0 100 --t0 350 --gas-phase --y-a0 0.5 --delta 1.0 --ideal-gas-temperature-correction --delta-h -30000 --ua 250 --ta 330 --no-show
+python3 reactor_engine.py \
+  --mode nonisothermal-pfr \
+  --volume 250 \
+  --fa0 10 \
+  --fb0 15 \
+  --v0 100 \
+  --t0 350 \
+  --gas-phase \
+  --y-a0 0.5 \
+  --delta 1.0 \
+  --ideal-gas-temperature-correction \
+  --delta-h -30000 \
+  --ua 250 \
+  --ta 330 \
+  --no-show
 \end{lstlisting}
 
 \section{Mode 5: Series Batch Reactor, $A \to B \to C$}
@@ -403,13 +491,26 @@ Use:
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode series-batch --series-k1 0.5 --series-k2 0.2 --ca0 2 --time-start 0 --time-end 12
+python3 reactor_engine.py \
+  --mode series-batch \
+  --series-k1 0.5 \
+  --series-k2 0.2 \
+  --ca0 2 \
+  --time-start 0 \
+  --time-end 12
 \end{lstlisting}
 
 Use \texttt{--no-show} if you do not want the plot:
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode series-batch --series-k1 0.5 --series-k2 0.2 --ca0 2 --time-start 0 --time-end 12 --no-show
+python3 reactor_engine.py \
+  --mode series-batch \
+  --series-k1 0.5 \
+  --series-k2 0.2 \
+  --ca0 2 \
+  --time-start 0 \
+  --time-end 12 \
+  --no-show
 \end{lstlisting}
 
 \subsection{Example 5B: Faster Desired Step, Slower Undesired Step}
@@ -419,7 +520,14 @@ python3 reactor_engine.py --mode series-batch --series-k1 0.5 --series-k2 0.2 --
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode series-batch --series-k1 0.8 --series-k2 0.15 --ca0 3 --time-start 0 --time-end 20 --no-show
+python3 reactor_engine.py \
+  --mode series-batch \
+  --series-k1 0.8 \
+  --series-k2 0.15 \
+  --ca0 3 \
+  --time-start 0 \
+  --time-end 20 \
+  --no-show
 \end{lstlisting}
 
 \subsection{Example 5C: Undesired Step Is Fast}
@@ -429,7 +537,14 @@ python3 reactor_engine.py --mode series-batch --series-k1 0.8 --series-k2 0.15 -
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode series-batch --series-k1 0.4 --series-k2 1.1 --ca0 2.5 --time-start 0 --time-end 10 --no-show
+python3 reactor_engine.py \
+  --mode series-batch \
+  --series-k1 0.4 \
+  --series-k2 1.1 \
+  --ca0 2.5 \
+  --time-start 0 \
+  --time-end 10 \
+  --no-show
 \end{lstlisting}
 
 \section{Mode 6: Series CSTR, $A \to B \to C$}
@@ -457,7 +572,14 @@ The residence time that maximizes $B$ is:
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode series-cstr --series-k1 0.5 --series-k2 0.2 --ca0 2 --time-start 0 --time-end 12 --no-show
+python3 reactor_engine.py \
+  --mode series-cstr \
+  --series-k1 0.5 \
+  --series-k2 0.2 \
+  --ca0 2 \
+  --time-start 0 \
+  --time-end 12 \
+  --no-show
 \end{lstlisting}
 
 \subsection{Example 6B: Larger Initial Concentration}
@@ -467,7 +589,14 @@ python3 reactor_engine.py --mode series-cstr --series-k1 0.5 --series-k2 0.2 --c
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode series-cstr --series-k1 0.5 --series-k2 0.2 --ca0 5 --time-start 0 --time-end 12 --no-show
+python3 reactor_engine.py \
+  --mode series-cstr \
+  --series-k1 0.5 \
+  --series-k2 0.2 \
+  --ca0 5 \
+  --time-start 0 \
+  --time-end 12 \
+  --no-show
 \end{lstlisting}
 
 \subsection{Example 6C: Different Rate Constants}
@@ -477,7 +606,14 @@ python3 reactor_engine.py --mode series-cstr --series-k1 0.5 --series-k2 0.2 --c
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode series-cstr --series-k1 1.2 --series-k2 0.3 --ca0 1.8 --time-start 0 --time-end 10 --no-show
+python3 reactor_engine.py \
+  --mode series-cstr \
+  --series-k1 1.2 \
+  --series-k2 0.3 \
+  --ca0 1.8 \
+  --time-start 0 \
+  --time-end 10 \
+  --no-show
 \end{lstlisting}
 
 \section{Mode 7: Power-Law Kinetic Fitting}
@@ -557,7 +693,10 @@ examples/power_fit_example.csv
 Then run:
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode kinetic-fit-power-law --fit-data-csv examples/power_fit_example.xlsx --no-show
+python3 reactor_engine.py \
+  --mode kinetic-fit-power-law \
+  --fit-data-csv examples/power_fit_example.xlsx \
+  --no-show
 \end{lstlisting}
 
 \subsection{Example 7A: Fit a New Catalytic Rate Law}
@@ -573,7 +712,10 @@ The experimental data are shown in the previous table. Determine $\alpha$, $\bet
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode kinetic-fit-power-law --fit-data-csv examples/power_fit_example.xlsx --no-show
+python3 reactor_engine.py \
+  --mode kinetic-fit-power-law \
+  --fit-data-csv examples/power_fit_example.xlsx \
+  --no-show
 \end{lstlisting}
 
 \subsection{Data Format B: Product Mole Fraction Given}
@@ -621,7 +763,11 @@ A CSTR contains four baskets with 10 g catalyst each, so $W_{cat}=40$ g. Determi
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode kinetic-fit-power-law --fit-data-csv examples/kinetic_fit_photo.csv --catalyst-weight 40 --no-show
+python3 reactor_engine.py \
+  --mode kinetic-fit-power-law \
+  --fit-data-csv examples/kinetic_fit_photo.csv \
+  --catalyst-weight 40 \
+  --no-show
 \end{lstlisting}
 
 \subsection{Example 7C: Same Fit with a Plot}
@@ -629,13 +775,21 @@ python3 reactor_engine.py --mode kinetic-fit-power-law --fit-data-csv examples/k
 Remove \texttt{--no-show}:
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode kinetic-fit-power-law --fit-data-csv examples/kinetic_fit_photo.csv --catalyst-weight 40
+python3 reactor_engine.py \
+  --mode kinetic-fit-power-law \
+  --fit-data-csv examples/kinetic_fit_photo.csv \
+  --catalyst-weight 40
 \end{lstlisting}
 
 \subsection{Example 7D: Saving the Fit Plot}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode kinetic-fit-power-law --fit-data-csv examples/kinetic_fit_photo.csv --catalyst-weight 40 --save-plots plots --no-show
+python3 reactor_engine.py \
+  --mode kinetic-fit-power-law \
+  --fit-data-csv examples/kinetic_fit_photo.csv \
+  --catalyst-weight 40 \
+  --save-plots plots \
+  --no-show
 \end{lstlisting}
 
 \section{Mode 8: Parallel-Reaction CSTR Optimization}
