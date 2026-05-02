@@ -18,6 +18,7 @@
 \lstdefinestyle{terminal}{
     basicstyle=\ttfamily\small,
     breaklines=true,
+    breakatwhitespace=true,
     frame=single,
     columns=fullflexible,
     backgroundcolor=\color{gray!8}
@@ -52,6 +53,8 @@ python3 reactor_engine.py --mode MODE_NAME [inputs]
 \end{lstlisting}
 
 The most important input is always \texttt{--mode}, because it tells the code what type of problem to solve.
+
+\textbf{Copy-paste note.} Long commands are written with backslashes. Copy the whole command block at once. Each line that ends in \texttt{\textbackslash} tells Terminal that the command continues on the next line. Do not copy a line that has only \texttt{--}; every option must stay together, such as \texttt{--parallel-ku2}.
 
 \section{Before Running}
 
@@ -699,7 +702,30 @@ Product D sells for 75 dollars/mol, and disposal of each undesired product costs
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode parallel-cstr --parallel-ca0 2.5 --parallel-cb0 1.8 --parallel-exit-cb 0.6 --parallel-volume 500 --parallel-kd 0.45 --parallel-ku1 0.12 --parallel-ku2 0.08 --d-exp-a 1 --d-exp-b 1 --u1-exp-a 0.5 --u1-exp-b 1 --u2-exp-a 2 --u2-exp-b 1 --desired-price 75 --undesired-cost 15 --previous-d 1.1 --previous-u1 0.4 --previous-u2 0.5 --optimized-d 1.4 --optimized-u1 0.25 --optimized-u2 0.35 --no-show
+python3 reactor_engine.py \
+  --mode parallel-cstr \
+  --parallel-ca0 2.5 \
+  --parallel-cb0 1.8 \
+  --parallel-exit-cb 0.6 \
+  --parallel-volume 500 \
+  --parallel-kd 0.45 \
+  --parallel-ku1 0.12 \
+  --parallel-ku2 0.08 \
+  --d-exp-a 1 \
+  --d-exp-b 1 \
+  --u1-exp-a 0.5 \
+  --u1-exp-b 1 \
+  --u2-exp-a 2 \
+  --u2-exp-b 1 \
+  --desired-price 75 \
+  --undesired-cost 15 \
+  --previous-d 1.1 \
+  --previous-u1 0.4 \
+  --previous-u2 0.5 \
+  --optimized-d 1.4 \
+  --optimized-u1 0.25 \
+  --optimized-u2 0.35 \
+  --no-show
 \end{lstlisting}
 
 \subsection{Example 8B: Same Problem with a Plot}
@@ -707,7 +733,29 @@ python3 reactor_engine.py --mode parallel-cstr --parallel-ca0 2.5 --parallel-cb0
 Remove \texttt{--no-show}:
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode parallel-cstr --parallel-ca0 2.5 --parallel-cb0 1.8 --parallel-exit-cb 0.6 --parallel-volume 500 --parallel-kd 0.45 --parallel-ku1 0.12 --parallel-ku2 0.08 --d-exp-a 1 --d-exp-b 1 --u1-exp-a 0.5 --u1-exp-b 1 --u2-exp-a 2 --u2-exp-b 1 --desired-price 75 --undesired-cost 15 --previous-d 1.1 --previous-u1 0.4 --previous-u2 0.5 --optimized-d 1.4 --optimized-u1 0.25 --optimized-u2 0.35
+python3 reactor_engine.py \
+  --mode parallel-cstr \
+  --parallel-ca0 2.5 \
+  --parallel-cb0 1.8 \
+  --parallel-exit-cb 0.6 \
+  --parallel-volume 500 \
+  --parallel-kd 0.45 \
+  --parallel-ku1 0.12 \
+  --parallel-ku2 0.08 \
+  --d-exp-a 1 \
+  --d-exp-b 1 \
+  --u1-exp-a 0.5 \
+  --u1-exp-b 1 \
+  --u2-exp-a 2 \
+  --u2-exp-b 1 \
+  --desired-price 75 \
+  --undesired-cost 15 \
+  --previous-d 1.1 \
+  --previous-u1 0.4 \
+  --previous-u2 0.5 \
+  --optimized-d 1.4 \
+  --optimized-u1 0.25 \
+  --optimized-u2 0.35
 \end{lstlisting}
 
 \subsection{Example 8C: Change the Undesired Reaction Order}
@@ -723,7 +771,22 @@ Find the new optimum.
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode parallel-cstr --parallel-ca0 2.5 --parallel-cb0 1.8 --parallel-exit-cb 0.6 --parallel-volume 500 --parallel-kd 0.45 --parallel-ku1 0.12 --parallel-ku2 0.08 --d-exp-a 1 --d-exp-b 1 --u1-exp-a 0.5 --u1-exp-b 1 --u2-exp-a 1.5 --u2-exp-b 1 --no-show
+python3 reactor_engine.py \
+  --mode parallel-cstr \
+  --parallel-ca0 2.5 \
+  --parallel-cb0 1.8 \
+  --parallel-exit-cb 0.6 \
+  --parallel-volume 500 \
+  --parallel-kd 0.45 \
+  --parallel-ku1 0.12 \
+  --parallel-ku2 0.08 \
+  --d-exp-a 1 \
+  --d-exp-b 1 \
+  --u1-exp-a 0.5 \
+  --u1-exp-b 1 \
+  --u2-exp-a 1.5 \
+  --u2-exp-b 1 \
+  --no-show
 \end{lstlisting}
 
 \subsection{Example 8D: Higher Desired Product Price}
@@ -733,7 +796,30 @@ python3 reactor_engine.py --mode parallel-cstr --parallel-ca0 2.5 --parallel-cb0
 \textbf{Command.}
 
 \begin{lstlisting}
-python3 reactor_engine.py --mode parallel-cstr --parallel-ca0 2.5 --parallel-cb0 1.8 --parallel-exit-cb 0.6 --parallel-volume 500 --parallel-kd 0.45 --parallel-ku1 0.12 --parallel-ku2 0.08 --d-exp-a 1 --d-exp-b 1 --u1-exp-a 0.5 --u1-exp-b 1 --u2-exp-a 2 --u2-exp-b 1 --desired-price 120 --undesired-cost 15 --previous-d 1.1 --previous-u1 0.4 --previous-u2 0.5 --optimized-d 1.4 --optimized-u1 0.25 --optimized-u2 0.35 --no-show
+python3 reactor_engine.py \
+  --mode parallel-cstr \
+  --parallel-ca0 2.5 \
+  --parallel-cb0 1.8 \
+  --parallel-exit-cb 0.6 \
+  --parallel-volume 500 \
+  --parallel-kd 0.45 \
+  --parallel-ku1 0.12 \
+  --parallel-ku2 0.08 \
+  --d-exp-a 1 \
+  --d-exp-b 1 \
+  --u1-exp-a 0.5 \
+  --u1-exp-b 1 \
+  --u2-exp-a 2 \
+  --u2-exp-b 1 \
+  --desired-price 120 \
+  --undesired-cost 15 \
+  --previous-d 1.1 \
+  --previous-u1 0.4 \
+  --previous-u2 0.5 \
+  --optimized-d 1.4 \
+  --optimized-u1 0.25 \
+  --optimized-u2 0.35 \
+  --no-show
 \end{lstlisting}
 
 \section{Common Input Checklist}
