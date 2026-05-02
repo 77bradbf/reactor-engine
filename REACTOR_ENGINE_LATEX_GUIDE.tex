@@ -44,7 +44,7 @@ The main file is:
 reactor_engine.py
 \end{lstlisting}
 
-It is a Python command-line tool for common chemical reaction engineering calculations. The code can compute reactor design, conversion profiles, temperature profiles, reaction selectivity, reaction yield, kinetic parameters from experimental data, and parallel-reaction CSTR optimization.
+It is a Python command-line tool for common chemical reaction engineering calculations. The code can compute reactor design, conversion profiles, temperature profiles, reaction selectivity, reaction yield, kinetic parameters from experimental data, parallel-reaction CSTR optimization, pure-species property lookups, and non-isothermal PFR calculations using real heat capacities from property libraries.
 
 The general command pattern is:
 
@@ -68,14 +68,35 @@ cd reactor-engine
 Install the base Python packages if needed:
 
 \begin{lstlisting}
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 \end{lstlisting}
 
 For advanced real-data/property calculations, install:
 
 \begin{lstlisting}
-pip install -r requirements-advanced.txt
+python3 -m pip install -r requirements-advanced.txt
 \end{lstlisting}
+
+
+\subsection{Advanced Libraries Used by the Project}
+
+The advanced requirements file includes several scientific libraries. The current code uses some directly and keeps others available for future extensions:
+
+\begin{center}
+\begin{tabular}{p{0.25\linewidth} p{0.62\linewidth}}
+\toprule
+\textbf{Library} & \textbf{How It Helps} \\
+\midrule
+\texttt{pandas} & Reads CSV and Excel tables for kinetic fitting when available. \\
+\texttt{openpyxl} & Lets \texttt{pandas} read \texttt{.xlsx} Excel files. \\
+\texttt{thermo} & Provides chemical properties and molar heat capacities for real species. \\
+\texttt{CoolProp} & Provides thermophysical properties for many common fluids. \\
+\texttt{pint} & Installed for future unit-aware calculations. \\
+\texttt{lmfit} & Installed for future nonlinear kinetic fitting and uncertainty estimates. \\
+\texttt{cantera} & Installed for future detailed kinetics, thermodynamics, and reactor networks. \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 Show all available options:
 
@@ -115,6 +136,8 @@ python3 reactor_engine.py --mode series-batch --save-plots plots --no-show
 \texttt{series-cstr} & CSTR for first-order series reactions $A \to B \to C$. \\
 \texttt{kinetic-fit-power-law} & Fits $r = kx_1^\alpha x_2^\beta$ from experimental data. \\
 \texttt{parallel-cstr} & Optimizes selectivity and profit for parallel CSTR reactions. \\
+\texttt{species-properties} & Looks up real pure-species properties with \texttt{thermo} or \texttt{CoolProp}. \\
+\texttt{species-nonisothermal-pfr} & Solves a non-isothermal PFR using real species heat capacities from \texttt{thermo} or \texttt{CoolProp}. \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -976,6 +999,170 @@ python3 reactor_engine.py \
   --no-show
 \end{lstlisting}
 
+
+\section{Mode 9: Species Properties with \texttt{thermo} or \texttt{CoolProp}}
+
+\subsection{What the Code Computes}
+
+This mode looks up real pure-species properties at a specified temperature and pressure. It can use \texttt{thermo}, \texttt{CoolProp}, or \texttt{auto}. With \texttt{auto}, the code tries \texttt{thermo} first and then \texttt{CoolProp}.
+
+Depending on the backend and species, the output can include molecular weight, phase, density, heat capacity, enthalpy, entropy, vapor pressure, viscosity, thermal conductivity, critical properties, and other available properties.
+
+\subsection{Minimum Inputs}
+
+\begin{itemize}
+    \item \texttt{--mode species-properties}
+    \item \texttt{--species}: chemical name or backend-recognized species name
+    \item \texttt{--temperature}: temperature in K
+    \item \texttt{--pressure}: pressure in Pa
+    \item \texttt{--property-backend}: \texttt{auto}, \texttt{thermo}, or \texttt{coolprop}
+\end{itemize}
+
+\subsection{Example 9A: Water Properties with Automatic Backend}
+
+\textbf{Problem statement.} Find real pure-water properties at 350 K and 1 atm. Let the code choose the backend automatically.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py \
+  --mode species-properties \
+  --species water \
+  --temperature 350 \
+  --pressure 101325 \
+  --property-backend auto \
+  --no-show
+\end{lstlisting}
+
+\subsection{Example 9B: Ethanol Properties Forced Through \texttt{thermo}}
+
+\textbf{Problem statement.} Find ethanol properties at 330 K and 1 atm using the \texttt{thermo} library.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py \
+  --mode species-properties \
+  --species ethanol \
+  --temperature 330 \
+  --pressure 101325 \
+  --property-backend thermo \
+  --no-show
+\end{lstlisting}
+
+\subsection{Example 9C: Water Properties Forced Through \texttt{CoolProp}}
+
+\textbf{Problem statement.} Find water properties at 350 K and 1 atm using \texttt{CoolProp}. Some \texttt{CoolProp} names use capital letters, such as \texttt{Water}.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py \
+  --mode species-properties \
+  --species Water \
+  --temperature 350 \
+  --pressure 101325 \
+  --property-backend coolprop \
+  --no-show
+\end{lstlisting}
+
+\section{Mode 10: Species-Based Non-Isothermal PFR}
+
+\subsection{What the Code Computes}
+
+This mode solves the same coupled PFR design and energy balance as \texttt{nonisothermal-pfr}, but it calculates the heat-capacity flow using real species molar heat capacities from \texttt{thermo} or \texttt{CoolProp}:
+
+\begin{align}
+\frac{dX}{dV} &= \frac{-r_A}{F_{A0}} \\
+\frac{dT}{dV} &= \frac{Ua(T_a - T) + (-r_A)(-\Delta H_{rxn})}{\sum F_i C_{p,i}(T,P)}
+\end{align}
+
+This is more realistic than entering constant \texttt{--cp-a}, \texttt{--cp-b}, and \texttt{--cp-p} by hand.
+
+\subsection{Minimum Inputs}
+
+\begin{itemize}
+    \item reactor/feed inputs: \texttt{--volume}, \texttt{--fa0}, \texttt{--fb0}, \texttt{--v0}, \texttt{--t0}
+    \item species names: \texttt{--species-a}, \texttt{--species-b}, \texttt{--species-p}
+    \item heat inputs: \texttt{--delta-h}, \texttt{--ua}, \texttt{--ta}
+    \item property inputs: \texttt{--pressure}, \texttt{--property-backend}
+    \item optional inert: \texttt{--fi0} and \texttt{--species-i}
+\end{itemize}
+
+\subsection{Example 10A: Ethanol Oxidation-Type PFR with Real Heat Capacities}
+
+\textbf{Problem statement.} A PFR is modeled with A = ethanol, B = oxygen, and P = acetaldehyde. The feed has $F_{A0}=2$ mol/time and $F_{B0}=3$ mol/time, with $v_0=50$ volume/time and $T_0=330$ K. The reactor volume is 50, $\Delta H_{rxn}=-50000$ J/mol A, $Ua=120$, and $T_a=310$ K. Compute conversion and exit temperature using real heat capacities from \texttt{thermo}.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py \
+  --mode species-nonisothermal-pfr \
+  --volume 50 \
+  --fa0 2 \
+  --fb0 3 \
+  --v0 50 \
+  --t0 330 \
+  --species-a ethanol \
+  --species-b oxygen \
+  --species-p acetaldehyde \
+  --delta-h -50000 \
+  --ua 120 \
+  --ta 310 \
+  --pressure 101325 \
+  --property-backend thermo \
+  --no-show
+\end{lstlisting}
+
+\subsection{Example 10B: Same PFR with an Inert Diluent}
+
+\textbf{Problem statement.} Repeat the previous reactor, but add 5 mol/time of nitrogen inert. Because an inert is present, include both \texttt{--fi0} and \texttt{--species-i}.
+
+\textbf{Command.}
+
+\begin{lstlisting}
+python3 reactor_engine.py \
+  --mode species-nonisothermal-pfr \
+  --volume 50 \
+  --fa0 2 \
+  --fb0 3 \
+  --fi0 5 \
+  --v0 100 \
+  --t0 330 \
+  --species-a ethanol \
+  --species-b oxygen \
+  --species-p acetaldehyde \
+  --species-i nitrogen \
+  --delta-h -50000 \
+  --ua 120 \
+  --ta 310 \
+  --pressure 101325 \
+  --property-backend thermo \
+  --no-show
+\end{lstlisting}
+
+\subsection{Example 10C: Show the Conversion and Temperature Plots}
+
+Remove \texttt{--no-show} to open the Matplotlib plots:
+
+\begin{lstlisting}
+python3 reactor_engine.py \
+  --mode species-nonisothermal-pfr \
+  --volume 50 \
+  --fa0 2 \
+  --fb0 3 \
+  --v0 50 \
+  --t0 330 \
+  --species-a ethanol \
+  --species-b oxygen \
+  --species-p acetaldehyde \
+  --delta-h -50000 \
+  --ua 120 \
+  --ta 310 \
+  --pressure 101325 \
+  --property-backend thermo
+\end{lstlisting}
+
 \section{Common Input Checklist}
 
 \subsection{For Reactor Design Problems}
@@ -1016,6 +1203,18 @@ Ask:
     \item Is profit required? If yes, what are product values and disposal costs?
 \end{enumerate}
 
+\subsection{For Real Species Property Problems}
+
+Ask:
+
+\begin{enumerate}
+    \item Which species names should the property library use?
+    \item What are the temperature and pressure?
+    \item Should the backend be \texttt{auto}, \texttt{thermo}, or \texttt{coolprop}?
+    \item For species-based PFRs, which species correspond to A, B, product P, and optional inert I?
+    \item Is the heat of reaction exothermic or endothermic, and are the energy units consistent?
+\end{enumerate}
+
 \section{All Major Command-Line Inputs}
 
 \begin{center}
@@ -1041,6 +1240,11 @@ Ask:
 \texttt{--parallel-kd}, \texttt{--parallel-ku1}, \texttt{--parallel-ku2} & Parallel reaction rate constants. \\
 \texttt{--d-exp-a}, \texttt{--u1-exp-a}, etc. & Reaction orders in the parallel rate laws. \\
 \texttt{--desired-price}, \texttt{--undesired-cost} & Economic values for profit calculation. \\
+\texttt{--species} & Pure species name for property lookup. \\
+\texttt{--species-a}, \texttt{--species-b}, \texttt{--species-p} & Species names for reactant A, reactant B, and product P. \\
+\texttt{--species-i} & Optional inert species name when \texttt{--fi0} is nonzero. \\
+\texttt{--pressure} & Pressure for real-property calculations, Pa. \\
+\texttt{--property-backend} & Selects \texttt{auto}, \texttt{thermo}, or \texttt{coolprop}. \\
 \texttt{--no-show} & Suppresses plot windows. \\
 \texttt{--save-plots} & Saves plots to a folder. \\
 \bottomrule
@@ -1059,6 +1263,8 @@ The code is most useful when you first classify the problem:
     \item Use \texttt{series-cstr} for CSTR $A\to B\to C$ problems.
     \item Use \texttt{kinetic-fit-power-law} when the problem gives experimental data and asks for reaction orders and $k$.
     \item Use \texttt{parallel-cstr} when the problem asks for selectivity, yield, waste products, or profit optimization in parallel reactions.
+    \item Use \texttt{species-properties} when the problem asks for real physical properties of a chemical species.
+    \item Use \texttt{species-nonisothermal-pfr} when the energy balance should use real species heat capacities from property libraries.
 \end{itemize}
 
 \end{document}
